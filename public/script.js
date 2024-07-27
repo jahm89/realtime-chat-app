@@ -1,4 +1,5 @@
-const ws = new WebSocket('ws://localhost:3000');
+const HOST = location.origin.replace(/^https/, 'ws')
+const ws = new WebSocket(HOST);
 
 // Check WebSocket connection status
 ws.onopen = () => {
