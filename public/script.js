@@ -1,4 +1,4 @@
-const HOST = location.origin.replace(/^https/, 'ws')
+const HOST = location.origin.replace(/^https/, 'wss')
 const ws = new WebSocket(HOST);
 
 // Check WebSocket connection status
