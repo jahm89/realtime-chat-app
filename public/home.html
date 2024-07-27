@@ -23,6 +23,7 @@
             </div>
         </div>
         <h1>Active Users</h1>
+        <h3>Click any user to start the chat</h3>
         <div class="row">
             <div class="col-sm-10 offset-1">
                 <div id="userList" class="card">
@@ -50,7 +51,6 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-
                 if (data.type === 'users') {
                     const currentUser = JSON.parse(sessionStorage.getItem('user'));
                     userList.html('');

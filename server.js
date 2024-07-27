@@ -11,14 +11,6 @@ const users = new Map(); // To store user information
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/users', (req, res) => {
-    res.json(Array.from(users.values()).map(user => ({
-        id: user.id,
-        nickname: user.nickname,
-        avatar: user.avatar
-    })));
-});
-
 wss.on('connection', (ws) => {
     console.log('New WebSocket connection established');
 
@@ -55,22 +47,20 @@ wss.on('connection', (ws) => {
                 }
             break;
             case 'endChat':
-                const targetedUser = users.get(parsedMessage.targetId);
-                if (targetedUser && targetedUser.ws) {
-                    targetedUser.ws.send(JSON.stringify({
-                        type: 'endChat'
-                    }));
-                } else {
-                    console.log(`Target user ${parsedMessage.targetId} not found or no WebSocket connection`);
-                }
+                wss.clients.forEach(client => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(parsedMessage));
+                    }
+                });
             break;
-            case 'webrtcOffer':
-            case 'webrtcAnswer':
-            case 'webrtcIceCandidate':
-                const target = users.get(parsedMessage.targetId);
-                if (target && target.ws) {
-                    target.ws.send(JSON.stringify(parsedMessage));
-                }
+            case 'offer':
+            case 'answer':
+            case 'ice':
+                wss.clients.forEach(client => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(parsedMessage));
+                    }
+                });
             break;
         }
     });
