@@ -33,14 +33,14 @@ wss.on('connection', (ws) => {
                 userId = parsedMessage.id;
                 users.set(userId, { ...parsedMessage, ws });
                 broadcastUsers();
-                break;
+            break;
             case 'logout':
                 users.delete(userId);
                 broadcastUsers();
-                break;
+            break;
             case 'message':
                 broadcastMessage(parsedMessage);
-                break;
+            break;
             case 'chatRequest':
                 const targetUser = users.get(parsedMessage.targetId);
                 if (targetUser && targetUser.ws) {
@@ -53,7 +53,25 @@ wss.on('connection', (ws) => {
                 } else {
                     console.log(`Target user ${parsedMessage.targetId} not found or no WebSocket connection`);
                 }
-                break;
+            break;
+            case 'endChat':
+                const targetedUser = users.get(parsedMessage.targetId);
+                if (targetedUser && targetedUser.ws) {
+                    targetedUser.ws.send(JSON.stringify({
+                        type: 'endChat'
+                    }));
+                } else {
+                    console.log(`Target user ${parsedMessage.targetId} not found or no WebSocket connection`);
+                }
+            break;
+            case 'webrtcOffer':
+            case 'webrtcAnswer':
+            case 'webrtcIceCandidate':
+                const target = users.get(parsedMessage.targetId);
+                if (target && target.ws) {
+                    target.ws.send(JSON.stringify(parsedMessage));
+                }
+            break;
         }
     });
 
